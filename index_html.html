@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echo App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: -1px;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="text"]:focus {
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .clear-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+
+        .output {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .output.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .output-text {
+            color: #333;
+            font-size: 18px;
+            word-break: break-word;
+            line-height: 1.5;
+        }
+
+        .placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .history {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: white;
+            margin: 10px 0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border-left: 3px solid #764ba2;
+            font-size: 14px;
+            opacity: 0;
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+
+            button {
+                margin-bottom: 10px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Echo App</h1>
+        <div class="input-group">
+            <input type="text" id="userInput" placeholder="Type something here..." maxlength="500">
+        </div>
+        <button onclick="echoInput()">Echo</button>
+        <button class="clear-btn" onclick="clearAll()">Clear</button>
+        
+        <div class="output" id="output">
+            <div class="output-text placeholder">Your message will appear here...</div>
+        </div>
+
+        <div class="history" id="history"></div>
+    </div>
+
+    <script>
+        const input = document.getElementById('userInput');
+        const output = document.getElementById('output');
+        const outputText = output.querySelector('.output-text');
+        const history = document.getElementById('history');
+        let messageCount = 0;
+
+        function echoInput() {
+            const text = input.value.trim();
+            
+            if (text === '') {
+                showOutput('Please enter some text first!', true);
+                return;
+            }
+            
+            showOutput(text, false);
+            addToHistory(text);
+            input.value = '';
+        }
+
+        function showOutput(text, isPlaceholder) {
+            outputText.textContent = text;
+            outputText.className = isPlaceholder ? 'output-text placeholder' : 'output-text';
+            
+            output.classList.remove('show');
+            setTimeout(() => {
+                output.classList.add('show');
+            }, 100);
+        }
+
+        function addToHistory(text) {
+            messageCount++;
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            historyItem.innerHTML = `<strong>#${messageCount}:</strong> ${text}`;
+            history.appendChild(historyItem);
+            
+            // Keep only last 5 messages
+            while (history.children.length > 5) {
+                history.removeChild(history.firstChild);
+            }
+            
+            // Scroll to bottom
+            history.scrollTop = history.scrollHeight;
+        }
+
+        function clearAll() {
+            input.value = '';
+            outputText.textContent = 'Your message will appear here...';
+            outputText.className = 'output-text placeholder';
+            output.classList.remove('show');
+            history.innerHTML = '';
+            messageCount = 0;
+        }
+
+        // Allow Enter key to submit
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                echoInput();
+            }
+        });
+
+        // Auto-focus input on page load
+        window.addEventListener('load', function() {
+            input.focus();
+        });
+    </script>
+</body>
+</html>
